@@ -1,7 +1,29 @@
 """Interactive workflow for AI Pitfall Detector."""
 
 import os
+import sys
+
+# Ensure UTF-8 encoding on Windows
+if sys.platform.startswith('win'):
+    try:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    except (AttributeError, UnicodeEncodeError):
+        # Fallback for environments that don't support UTF-8
+        pass
+
 import click
+
+def safe_print(text: str) -> None:
+    """Print text with fallback for encoding issues."""
+    try:
+        click.echo(text)
+    except UnicodeEncodeError:
+        # Remove emojis and problematic Unicode characters
+        import re
+        ascii_text = re.sub(r'[^\x00-\x7F]', '?', text)
+        click.echo(ascii_text)
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 from datetime import datetime
@@ -25,8 +47,8 @@ class InteractiveWorkflow:
         
     def run(self):
         """Run the complete interactive workflow."""
-        click.echo("🚀 AI Pitfall Detector - Interactive Workflow")
-        click.echo("=" * 60)
+        safe_print("🚀 AI Pitfall Detector - Interactive Workflow")
+        safe_print("=" * 60)
         
         try:
             # Step 1: Welcome and setup
@@ -47,12 +69,12 @@ class InteractiveWorkflow:
             # Step 9-10: Analyze and report
             self._step9_10_analyze_and_report(confirmed_tools, target_tools, api_key)
             
-            click.echo("\n✅ Interactive workflow completed successfully!")
+            safe_print("\n✅ Interactive workflow completed successfully!")
             
         except KeyboardInterrupt:
-            click.echo("\n\n⚠️  Workflow interrupted by user. Progress has been saved.")
+            safe_print("\n\n⚠️  Workflow interrupted by user. Progress has been saved.")
         except Exception as e:
-            click.echo(f"\n❌ Workflow failed: {e}")
+            safe_print(f"\n❌ Workflow failed: {e}")
             raise
     
     def _show_progress(self, step_name: str):
@@ -60,35 +82,35 @@ class InteractiveWorkflow:
         self.current_step += 1
         progress = "█" * (self.current_step * 20 // self.total_steps)
         remaining = "░" * (20 - len(progress))
-        click.echo(f"\n📊 Progress: [{progress}{remaining}] Step {self.current_step}/{self.total_steps}: {step_name}")
+        safe_print(f"\n📊 Progress: [{progress}{remaining}] Step {self.current_step}/{self.total_steps}: {step_name}")
     
     def _step1_welcome(self):
         """Step 1: Welcome and project setup."""
-        self._show_progress("项目初始化")
+        self._show_progress("Project Initialization")
         
         project_name = Path(self.project_path).name
-        click.echo(f"📁 当前项目: {project_name}")
-        click.echo(f"📂 项目路径: {self.project_path}")
+        safe_print(f"📁 Current Project: {project_name}")
+        safe_print(f"📂 Project Path: {self.project_path}")
         
         # Check if this project has been analyzed before
         project_config = self.config_manager.get_project_config(self.project_path)
         last_scan = project_config.get('last_scan_date')
         
         if last_scan:
-            click.echo(f"📅 上次扫描: {last_scan[:19].replace('T', ' ')}")
+            safe_print(f"📅 Last Scan: {last_scan[:19].replace('T', ' ')}")
             installed_count = len(project_config.get('installed_tools', []))
             if installed_count > 0:
-                click.echo(f"🔧 已保存 {installed_count} 个已安装工具配置")
+                safe_print(f"🔧 Saved {installed_count} installed tool configurations")
         
-        click.echo("\n准备开始扫描分析...")
+        safe_print("\nPreparing to start scan analysis...")
     
     def _step2_3_scan_and_display(self) -> List[Dict[str, Any]]:
         """Steps 2-3: Scan project and display detected tools."""
-        self._show_progress("扫描已安装工具")
+        self._show_progress("Scanning Installed Tools")
         
-        click.echo("🔍 正在扫描项目中的AI工具和框架...")
+        safe_print("🔍 Scanning AI tools and frameworks in your project...")
         
-        with click.progressbar(length=100, label='扫描进度') as bar:
+        with click.progressbar(length=100, label='Scan Progress') as bar:
             # Simulate progress updates
             bar.update(20)
             scan_results = self.scanner.scan_all(self.project_path)
@@ -100,13 +122,13 @@ class InteractiveWorkflow:
         
         detected_tools = scan_results.get('detected_ai_tools', [])
         
-        self._show_progress("展示检测结果")
+        self._show_progress("Displaying Detection Results")
         
-        click.echo(f"\n🎯 检测到 {len(detected_tools)} 个AI工具/框架:")
-        click.echo("-" * 50)
+        safe_print(f"\n🎯 Detected {len(detected_tools)} AI tools/frameworks:")
+        safe_print("-" * 50)
         
         if not detected_tools:
-            click.echo("❌ 未检测到任何AI工具")
+            safe_print("❌ No AI tools detected")
             return []
         
         for i, tool in enumerate(detected_tools, 1):
@@ -123,25 +145,25 @@ class InteractiveWorkflow:
                 'agent_framework_detected': '🤖'
             }.get(status, '❓')
             
-            click.echo(f"{i:2d}. {status_emoji} {tool_name}")
-            click.echo(f"     状态: {status}")
-            click.echo(f"     检测方式: {methods}")
+            safe_print(f"{i:2d}. {status_emoji} {tool_name}")
+            safe_print(f"     Status: {status}")
+            safe_print(f"     Detection method: {methods}")
             
             # Show additional info for certain tools
             if tool.get('confidence_score'):
-                click.echo(f"     置信度: {tool['confidence_score']:.1f}/1.0")
+                safe_print(f"     Confidence: {tool['confidence_score']:.1f}/1.0")
             
             versions = [v for v in tool.get('versions', []) if v != 'unknown']
             if versions:
-                click.echo(f"     版本: {', '.join(versions)}")
+                safe_print(f"     Version: {', '.join(versions)}")
             
-            click.echo()
+            safe_print()
         
         return detected_tools
     
     def _step4_6_confirm_and_supplement(self, detected_tools: List[Dict]) -> List[Dict]:
         """Steps 4-6: Interactive confirmation and supplementation loop."""
-        self._show_progress("确认检测结果")
+        self._show_progress("Confirming Detection Results")
         
         # First, save detected tools to config
         for tool in detected_tools:
@@ -165,11 +187,11 @@ class InteractiveWorkflow:
         
         # Confirmation loop
         while True:
-            click.echo("\n🤔 确认检测结果:")
-            missing = click.confirm("是否有遗漏的已安装AI工具/框架?", default=False)
+            safe_print("\n🤔 Confirm detection results:")
+            missing = click.confirm("Are there any missing installed AI tools/frameworks?", default=False)
             
             if not missing:
-                self._show_progress("工具列表确认完成")
+                self._show_progress("Tool List Confirmation Complete")
                 break
             
             # Get additional tools
@@ -177,26 +199,26 @@ class InteractiveWorkflow:
             confirmed_tools.extend(additional_tools)
             
             # Show updated list
-            click.echo(f"\n📋 已确认工具列表 (共{len(confirmed_tools)}个):")
+            safe_print(f"\n📋 Confirmed tool list ({len(confirmed_tools)} tools):")
             for i, tool in enumerate(confirmed_tools, 1):
                 name = tool.get('name', 'Unknown')
-                manual = "✋ 手动添加" if tool.get('manually_added', False) else "🔍 自动检测"
-                click.echo(f"  {i}. {name} ({manual})")
+                manual = "✋ Manually added" if tool.get('manually_added', False) else "🔍 Auto-detected"
+                safe_print(f"  {i}. {name} ({manual})")
         
         return confirmed_tools
     
     def _get_additional_tools(self) -> List[Dict]:
         """Get additional tools from user input."""
-        self._show_progress("添加遗漏工具")
+        self._show_progress("Adding Missing Tools")
         
         additional_tools = []
         
-        click.echo("\n📝 请输入遗漏的工具信息:")
-        click.echo("提示: 可以一次性输入多个工具，用逗号分隔")
-        click.echo("格式: 工具名称[=GitHub地址], 工具名称2[=GitHub地址2], ...")
-        click.echo("示例: langchain=https://github.com/langchain-ai/langchain, streamlit")
+        safe_print("\n📝 Please enter missing tool information:")
+        safe_print("Tip: You can enter multiple tools separated by commas")
+        safe_print("Format: tool_name[=GitHub_URL], tool_name2[=GitHub_URL2], ...")
+        safe_print("Example: langchain=https://github.com/langchain-ai/langchain, streamlit")
         
-        tools_input = click.prompt("\n请输入工具", type=str).strip()
+        tools_input = click.prompt("\nEnter tools", type=str).strip()
         
         if not tools_input:
             return additional_tools
@@ -216,7 +238,7 @@ class InteractiveWorkflow:
             if tool_name:
                 # Try to resolve GitHub URL if not provided
                 if not github_url:
-                    click.echo(f"🔍 正在搜索 {tool_name} 的GitHub地址...")
+                    safe_print(f"🔍 Searching for {tool_name}'s GitHub address...")
                     github_url = self._try_resolve_github_url(tool_name)
                 
                 tool_info = {
@@ -241,9 +263,9 @@ class InteractiveWorkflow:
                 self.config_manager.add_installed_tool(self.project_path, tool_name, config_tool_info)
                 
                 if github_url:
-                    click.echo(f"✅ 已添加: {tool_name} ({github_url})")
+                    safe_print(f"✅ Added: {tool_name} ({github_url})")
                 else:
-                    click.echo(f"✅ 已添加: {tool_name} (未找到GitHub地址)")
+                    safe_print(f"✅ Added: {tool_name} (GitHub URL not found)")
         
         return additional_tools
     
@@ -268,33 +290,33 @@ class InteractiveWorkflow:
     
     def _step7_get_target_tools(self) -> List[Dict]:
         """Step 7: Get tools user wants to install."""
-        self._show_progress("获取目标安装工具")
+        self._show_progress("Getting Target Installation Tools")
         
-        click.echo("\n🎯 目标工具配置:")
-        click.echo("请输入您计划安装的AI工具/框架")
+        safe_print("\n🎯 Target Tools Configuration:")
+        safe_print("Please enter AI tools/frameworks you plan to install")
         
         # Check saved target tools
         saved_targets = self.config_manager.get_target_tools(self.project_path)
         if saved_targets:
-            click.echo(f"\n💾 上次保存的目标工具 ({len(saved_targets)}个):")
+            safe_print(f"\n💾 Previously saved target tools ({len(saved_targets)} tools):")
             for i, tool in enumerate(saved_targets, 1):
-                click.echo(f"  {i}. {tool.get('display_name', tool.get('name'))}")
+                safe_print(f"  {i}. {tool.get('display_name', tool.get('name'))}")
             
-            use_saved = click.confirm("是否使用已保存的目标工具列表?", default=True)
+            use_saved = click.confirm("Use saved target tool list?", default=True)
             if use_saved:
                 # Ask if user wants to add more
-                add_more = click.confirm("是否要添加更多目标工具?", default=False)
+                add_more = click.confirm("Add more target tools?", default=False)
                 if not add_more:
                     return saved_targets
         
         target_tools = saved_targets.copy() if saved_targets else []
         
-        click.echo("\n📝 请输入计划安装的工具:")
-        click.echo("格式: 工具名称[=GitHub地址], 工具名称2[=GitHub地址2], ...")
-        click.echo("示例: CrewAI=https://github.com/joaomdmoura/crewAI, autogen")
-        click.echo("留空回车跳过此步骤")
+        safe_print("\n📝 Please enter tools you plan to install:")
+        safe_print("Format: tool_name[=GitHub_URL], tool_name2[=GitHub_URL2], ...")
+        safe_print("Example: CrewAI=https://github.com/joaomdmoura/crewAI, autogen")
+        safe_print("Press Enter to skip this step")
         
-        tools_input = click.prompt("目标工具", default='', show_default=False).strip()
+        tools_input = click.prompt("Target tools", default='', show_default=False).strip()
         
         if tools_input:
             tools_list = [t.strip() for t in tools_input.split(',') if t.strip()]
@@ -311,7 +333,7 @@ class InteractiveWorkflow:
                 if tool_name:
                     # Try to resolve GitHub URL if not provided
                     if not github_url:
-                        click.echo(f"🔍 正在搜索 {tool_name} 的GitHub地址...")
+                        safe_print(f"🔍 Searching for {tool_name} GitHub URL...")
                         github_url = self._try_resolve_github_url(tool_name)
                     
                     # Save target tool
@@ -327,31 +349,31 @@ class InteractiveWorkflow:
                     target_tools.append(target_tool)
                     
                     if github_url:
-                        click.echo(f"🎯 目标工具: {tool_name} ({github_url})")
+                        safe_print(f"🎯 Target tool: {tool_name} ({github_url})")
                     else:
-                        click.echo(f"🎯 目标工具: {tool_name} (未找到GitHub地址)")
+                        safe_print(f"🎯 Target tool: {tool_name} (GitHub URL not found)")
         
         if target_tools:
-            click.echo(f"\n📋 共计划安装 {len(target_tools)} 个工具")
+            safe_print(f"\n📋 Total {len(target_tools)} tools planned for installation")
         else:
-            click.echo("ℹ️  跳过目标工具配置，将仅分析现有工具间的冲突")
+            safe_print("ℹ️  Skipped target tool configuration, will analyze conflicts between existing tools only")
         
         return target_tools
     
     def _step8_configure_api_key(self) -> Optional[str]:
         """Step 8: Configure API key for analysis."""
-        self._show_progress("配置API密钥")
+        self._show_progress("Configuring API Key")
         
-        click.echo("\n🔑 API密钥配置:")
-        click.echo("AI冲突分析需要大模型API支持更准确的分析")
+        safe_print("\n🔑 API Key Configuration:")
+        safe_print("AI conflict analysis requires LLM API support for more accurate analysis")
         
         # Check if API key is already configured
         openai_set = self.config_manager.get_api_key_status('openai')
         anthropic_set = self.config_manager.get_api_key_status('anthropic')
         
         if openai_set or anthropic_set:
-            click.echo("✅ 检测到已配置的API密钥")
-            use_existing = click.confirm("使用已有的API密钥?", default=True)
+            safe_print("✅ Detected configured API key")
+            use_existing = click.confirm("Use existing API key?", default=True)
             if use_existing:
                 return "configured"
         
@@ -360,52 +382,52 @@ class InteractiveWorkflow:
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         
         if openai_key or anthropic_key:
-            click.echo("✅ 检测到环境变量中的API密钥")
+            safe_print("✅ Detected API key in environment variables")
             return "environment"
         
-        click.echo("\n选择API密钥配置方式:")
-        click.echo("1. 输入OpenAI API密钥")
-        click.echo("2. 输入Anthropic Claude API密钥") 
-        click.echo("3. 跳过 (仅使用静态规则分析)")
+        safe_print("\nChoose API key configuration method:")
+        safe_print("1. Enter OpenAI API key")
+        safe_print("2. Enter Anthropic Claude API key") 
+        safe_print("3. Skip (use static rules analysis only)")
         
-        choice = click.prompt("请选择", type=click.Choice(['1', '2', '3']), default='3')
+        choice = click.prompt("Please choose", type=click.Choice(['1', '2', '3']), default='3')
         
         if choice == '1':
-            api_key = click.prompt("OpenAI API密钥", hide_input=True)
+            api_key = click.prompt("OpenAI API key", hide_input=True)
             if api_key.strip():
                 # Set environment variable for this session
                 os.environ['OPENAI_API_KEY'] = api_key.strip()
                 self.config_manager.set_api_key_status('openai', True)
-                click.echo("✅ OpenAI API密钥已配置")
+                safe_print("✅ OpenAI API key configured")
                 return api_key.strip()
         elif choice == '2':
-            api_key = click.prompt("Anthropic API密钥", hide_input=True)
+            api_key = click.prompt("Anthropic API key", hide_input=True)
             if api_key.strip():
                 os.environ['ANTHROPIC_API_KEY'] = api_key.strip()
                 self.config_manager.set_api_key_status('anthropic', True)
-                click.echo("✅ Anthropic API密钥已配置")
+                safe_print("✅ Anthropic API key configured")
                 return api_key.strip()
         
-        click.echo("ℹ️  跳过API密钥配置，将使用静态规则进行分析")
+        safe_print("ℹ️  Skipped API key configuration, will use static rules for analysis")
         return None
     
     def _step9_10_analyze_and_report(self, confirmed_tools: List[Dict], target_tools: List[Dict], api_key: Optional[str]):
         """Steps 9-10: Analyze conflicts and generate report."""
-        self._show_progress("分析潜在冲突")
+        self._show_progress("Analyzing Potential Conflicts")
         
-        click.echo("\n🔬 开始冲突分析...")
+        safe_print("\n🔬 Starting conflict analysis...")
         
         # Combine all tools for analysis
         all_tools = confirmed_tools + target_tools
         
         if not all_tools:
-            click.echo("⚠️  没有工具需要分析")
+            safe_print("⚠️  No tools to analyze")
             return
         
         # Create analyzer
         analyzer = ConflictAnalyzer()
         
-        with click.progressbar(length=100, label='分析进度') as bar:
+        with click.progressbar(length=100, label='Analysis Progress') as bar:
             bar.update(25)
             
             # Analyze conflicts
@@ -415,7 +437,7 @@ class InteractiveWorkflow:
             # Generate report
             reporter = ConflictReporter()
             
-            self._show_progress("生成分析报告")
+            self._show_progress("Generating Analysis Report")
             
             # Interactive report display
             self._display_interactive_report(conflicts, confirmed_tools, target_tools)
@@ -426,19 +448,19 @@ class InteractiveWorkflow:
     
     def _display_interactive_report(self, conflicts: List[Dict], installed_tools: List[Dict], target_tools: List[Dict]):
         """Display interactive conflict report."""
-        click.echo("\n" + "=" * 60)
-        click.echo("🎯 AI工具冲突分析报告")
-        click.echo("=" * 60)
+        safe_print("\n" + "=" * 60)
+        safe_print("🎯 AI Tool Conflict Analysis Report")
+        safe_print("=" * 60)
         
         # Summary
-        click.echo(f"📊 分析摘要:")
-        click.echo(f"   • 已安装工具: {len(installed_tools)} 个")
-        click.echo(f"   • 目标安装工具: {len(target_tools)} 个")
-        click.echo(f"   • 发现的冲突: {len(conflicts)} 个")
+        safe_print(f"📊 Analysis Summary:")
+        safe_print(f"   • Installed tools: {len(installed_tools)} tools")
+        safe_print(f"   • Target installation tools: {len(target_tools)} tools")
+        safe_print(f"   • Conflicts found: {len(conflicts)} conflicts")
         
         if not conflicts:
-            click.echo("\n🎉 恭喜! 没有发现潜在冲突")
-            click.echo("✅ 您的工具配置看起来很安全")
+            safe_print("\n🎉 Congratulations! No potential conflicts found")
+            safe_print("✅ Your tool configuration looks safe")
             return
         
         # Group conflicts by severity
@@ -448,46 +470,46 @@ class InteractiveWorkflow:
         
         # Display high severity conflicts first
         if high_conflicts:
-            click.echo(f"\n🔴 高危冲突 ({len(high_conflicts)} 个):")
+            safe_print(f"\n🔴 High-Risk Conflicts ({len(high_conflicts)} conflicts):")
             for i, conflict in enumerate(high_conflicts, 1):
-                click.echo(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
-                click.echo(f"   工具: {', '.join(conflict.get('tools_involved', []))}")
-                click.echo(f"   影响: {conflict.get('potential_issues', 'Unknown impact')}")
-                click.echo(f"   建议: {conflict.get('mitigation', 'No recommendation')}")
+                safe_print(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
+                safe_print(f"   Tools: {', '.join(conflict.get('tools_involved', []))}")
+                safe_print(f"   Impact: {conflict.get('potential_issues', 'Unknown impact')}")
+                safe_print(f"   Recommendation: {conflict.get('mitigation', 'No recommendation')}")
                 
-                if click.confirm("   查看详细信息?", default=False):
+                if click.confirm("   View details?", default=False):
                     self._show_conflict_details(conflict)
         
         if medium_conflicts:
-            click.echo(f"\n🟡 中等冲突 ({len(medium_conflicts)} 个):")
+            safe_print(f"\n🟡 Medium-Risk Conflicts ({len(medium_conflicts)} conflicts):")
             for i, conflict in enumerate(medium_conflicts, 1):
-                click.echo(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
-                click.echo(f"   工具: {', '.join(conflict.get('tools_involved', []))}")
-                click.echo(f"   建议: {conflict.get('mitigation', 'No recommendation')}")
+                safe_print(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
+                safe_print(f"   Tools: {', '.join(conflict.get('tools_involved', []))}")
+                safe_print(f"   Recommendation: {conflict.get('mitigation', 'No recommendation')}")
         
         if low_conflicts:
-            if click.confirm(f"\n🟢 显示低危冲突 ({len(low_conflicts)} 个)?", default=False):
+            if click.confirm(f"\n🟢 Show low-risk conflicts ({len(low_conflicts)} conflicts)?", default=False):
                 for i, conflict in enumerate(low_conflicts, 1):
-                    click.echo(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
-                    click.echo(f"   工具: {', '.join(conflict.get('tools_involved', []))}")
+                    safe_print(f"\n{i}. {conflict.get('description', 'Unknown conflict')}")
+                    safe_print(f"   Tools: {', '.join(conflict.get('tools_involved', []))}")
         
         # Overall recommendation
         if high_conflicts:
-            click.echo("\n⚠️  建议: 请优先解决高危冲突后再进行安装")
+            safe_print("\n⚠️  Recommendation: Please resolve high-risk conflicts first before installation")
         elif medium_conflicts:
-            click.echo("\n💡 建议: 注意中等冲突，建议配置时多加小心")
+            safe_print("\n💡 Recommendation: Pay attention to medium conflicts, be careful during configuration")
         else:
-            click.echo("\n✅ 总体评估: 冲突风险较低，可以安全安装")
+            safe_print("\n✅ Overall Assessment: Low conflict risk, safe to install")
     
     def _show_conflict_details(self, conflict: Dict):
         """Show detailed conflict information."""
-        click.echo("   📋 详细信息:")
-        click.echo(f"      类型: {conflict.get('type', 'Unknown')}")
-        click.echo(f"      置信度: {conflict.get('confidence', 'Unknown')}")
-        click.echo(f"      来源: {conflict.get('source', 'Unknown')}")
+        safe_print("   📋 Detailed Information:")
+        safe_print(f"      Type: {conflict.get('type', 'Unknown')}")
+        safe_print(f"      Confidence: {conflict.get('confidence', 'Unknown')}")
+        safe_print(f"      Source: {conflict.get('source', 'Unknown')}")
         
         if 'additional_info' in conflict:
-            click.echo(f"      额外信息: {conflict['additional_info']}")
+            safe_print(f"      Additional Info: {conflict['additional_info']}")
     
     def _generate_static_report(self, conflicts: List[Dict], installed_tools: List[Dict], target_tools: List[Dict], analyzer):
         """Generate static report file."""
@@ -505,55 +527,55 @@ class InteractiveWorkflow:
             with open(report_file, 'w', encoding='utf-8') as f:
                 f.write(report_content)
             
-            click.echo(f"\n💾 详细报告已保存: {report_file}")
+            safe_print(f"\n💾 Detailed report saved: {report_file}")
             
-            if click.confirm("现在打开报告文件?", default=False):
+            if click.confirm("Open report file now?", default=False):
                 try:
                     import webbrowser
                     webbrowser.open(str(report_file))
                 except Exception:
-                    click.echo(f"请手动打开: {report_file}")
+                    safe_print(f"Please open manually: {report_file}")
         
         except Exception as e:
-            click.echo(f"⚠️  保存报告失败: {e}")
+            safe_print(f"⚠️  Failed to save report: {e}")
     
     def _generate_report_content(self, conflicts: List[Dict], installed_tools: List[Dict], target_tools: List[Dict]) -> str:
         """Generate detailed report content."""
         lines = []
         lines.append("=" * 80)
-        lines.append("AI工具冲突分析报告")
+        lines.append("AI Tool Conflict Analysis Report")
         lines.append("=" * 80)
-        lines.append(f"项目路径: {self.project_path}")
-        lines.append(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        lines.append(f"分析工具: AI Pitfall Detector")
+        lines.append(f"Project Path: {self.project_path}")
+        lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append(f"Analysis Tool: AI Pitfall Detector")
         lines.append("")
         
         # Summary section
-        lines.append("📊 分析摘要")
+        lines.append("📊 Analysis Summary")
         lines.append("-" * 40)
-        lines.append(f"已安装工具数量: {len(installed_tools)}")
-        lines.append(f"目标安装工具数量: {len(target_tools)}")
-        lines.append(f"检测到的冲突数量: {len(conflicts)}")
+        lines.append(f"Installed Tools Count: {len(installed_tools)}")
+        lines.append(f"Target Installation Tools Count: {len(target_tools)}")
+        lines.append(f"Conflicts Detected: {len(conflicts)}")
         lines.append("")
         
         # Installed tools
         if installed_tools:
-            lines.append("🔧 已安装工具列表")
+            lines.append("🔧 Installed Tools List")
             lines.append("-" * 40)
             for i, tool in enumerate(installed_tools, 1):
                 name = tool.get('name', 'Unknown')
                 status = tool.get('status', 'unknown')
                 methods = ', '.join(tool.get('detection_methods', []))
                 lines.append(f"{i:2d}. {name}")
-                lines.append(f"    状态: {status}")
-                lines.append(f"    检测方式: {methods}")
+                lines.append(f"    Status: {status}")
+                lines.append(f"    Detection Method: {methods}")
                 if tool.get('github_url'):
                     lines.append(f"    GitHub: {tool['github_url']}")
                 lines.append("")
         
         # Target tools
         if target_tools:
-            lines.append("🎯 目标安装工具列表")
+            lines.append("🎯 Target Installation Tools List")
             lines.append("-" * 40)
             for i, tool in enumerate(target_tools, 1):
                 name = tool.get('display_name', tool.get('name', 'Unknown'))
@@ -564,38 +586,38 @@ class InteractiveWorkflow:
         
         # Conflicts
         if conflicts:
-            lines.append("⚠️  冲突分析结果")
+            lines.append("⚠️  Conflict Analysis Results")
             lines.append("-" * 40)
             
             # Group by severity
             for severity, emoji in [('high', '🔴'), ('medium', '🟡'), ('low', '🟢')]:
                 severity_conflicts = [c for c in conflicts if c.get('severity') == severity]
                 if severity_conflicts:
-                    lines.append(f"\n{emoji} {severity.upper()}严重度冲突 ({len(severity_conflicts)} 个):")
+                    lines.append(f"\n{emoji} {severity.upper()} SEVERITY CONFLICTS ({len(severity_conflicts)} found):")
                     lines.append("")
                     
                     for i, conflict in enumerate(severity_conflicts, 1):
                         lines.append(f"{i}. {conflict.get('description', 'Unknown conflict')}")
-                        lines.append(f"   类型: {conflict.get('type', 'Unknown')}")
-                        lines.append(f"   涉及工具: {', '.join(conflict.get('tools_involved', []))}")
-                        lines.append(f"   潜在影响: {conflict.get('potential_issues', 'Unknown impact')}")
-                        lines.append(f"   解决建议: {conflict.get('mitigation', 'No recommendation')}")
-                        lines.append(f"   置信度: {conflict.get('confidence', 'Unknown')}")
-                        lines.append(f"   检测来源: {conflict.get('source', 'Unknown')}")
+                        lines.append(f"   Type: {conflict.get('type', 'Unknown')}")
+                        lines.append(f"   Affected Tools: {', '.join(conflict.get('tools_involved', []))}")
+                        lines.append(f"   Potential Impact: {conflict.get('potential_issues', 'Unknown impact')}")
+                        lines.append(f"   Mitigation: {conflict.get('mitigation', 'No recommendation')}")
+                        lines.append(f"   Confidence: {conflict.get('confidence', 'Unknown')}")
+                        lines.append(f"   Detection Source: {conflict.get('source', 'Unknown')}")
                         lines.append("")
         else:
-            lines.append("🎉 冲突分析结果")
+            lines.append("🎉 Conflict Analysis Results")
             lines.append("-" * 40)
-            lines.append("恭喜! 没有检测到潜在冲突。")
-            lines.append("您的工具配置看起来很安全，可以放心安装和使用。")
+            lines.append("Congratulations! No potential conflicts detected.")
+            lines.append("Your tool configuration appears safe for installation and use.")
             lines.append("")
         
         # Footer
         lines.append("-" * 80)
-        lines.append("报告说明:")
-        lines.append("• 此报告基于静态规则和动态分析生成")
-        lines.append("• 建议在实际安装前仔细阅读冲突描述和解决建议")
-        lines.append("• 如有疑问，请参考各工具的官方文档")
+        lines.append("Report Notes:")
+        lines.append("• This report is generated based on static rules and dynamic analysis")
+        lines.append("• Please carefully read conflict descriptions and mitigation suggestions before installation")
+        lines.append("• If you have questions, please refer to each tool's official documentation")
         lines.append("-" * 80)
         
         return "\n".join(lines)

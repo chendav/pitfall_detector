@@ -300,21 +300,21 @@ ai-pitfall interactive
 
 **Expected Output:**
 ```
-🎯 AI工具冲突分析报告
+🎯 AI Tool Conflict Analysis Report
 ====================================================
-📊 分析摘要:
-   • 已安装工具: 0 个
-   • 目标安装工具: 3 个
-   • 发现的冲突: 1 个
+📊 Analysis Summary:
+   • Installed tools: 0
+   • Target installation tools: 3
+   • Conflicts detected: 1
 
-💡 安装建议顺序:
-1. 先安装 langchain (基础框架)
-2. 安装 streamlit，配置端口避免冲突
-3. 最后安装 crewai，注意环境变量配置
+💡 Recommended Installation Order:
+1. Install langchain first (base framework)
+2. Install streamlit, configure port to avoid conflicts
+3. Finally install crewai, pay attention to environment variable configuration
 
-⚠️ 重要提醒:
-- streamlit 和系统可能的端口冲突 (8501)
-- 所有工具将共用 OPENAI_API_KEY 环境变量
+⚠️ Important Notes:
+- Potential port conflict between streamlit and system (8501)
+- All tools will share the OPENAI_API_KEY environment variable
 ```
 
 ### 📊 **Scenario 2: Existing Project Analysis**
@@ -380,152 +380,152 @@ ai-pitfall quick-analyze \
 ```
 🚀 AI Pitfall Detector - Interactive Workflow
 ============================================================
-📁 当前项目: ai-agent-project  
-📂 项目路径: /Users/dev/ai-agent-project
-📅 上次扫描: 2024-01-15 14:30:22
+📁 Current Project: ai-agent-project  
+📂 Project Path: /Users/dev/ai-agent-project
+📅 Last Scan: 2024-01-15 14:30:22
 
-🔍 正在扫描项目中的AI工具和框架...
-扫描进度 ████████████████████████████████████████ 100%
+🔍 Scanning AI tools and frameworks in project...
+Scanning Progress ████████████████████████████████████████ 100%
 
-🎯 检测到 5 个AI工具/框架:
+🎯 Detected 5 AI Tools/Frameworks:
 --------------------------------------------------
  1. ✅ langchain
-     状态: installed
-     检测方式: pip_installed, requirements_txt
-     版本: 0.1.17
-     置信度: 1.0/1.0
+     Status: installed
+     Detection Method: pip_installed, requirements_txt
+     Version: 0.1.17
+     Confidence: 1.0/1.0
 
  2. 🟢 streamlit
-     状态: running  
-     检测方式: running_process, pip_installed
-     版本: 1.28.2
-     端口: 8501
+     Status: running  
+     Detection Method: running_process, pip_installed
+     Version: 1.28.2
+     Port: 8501
 
  3. 🤖 crewai
-     状态: agent_framework_detected
-     检测方式: dynamic_agent_detection
-     置信度: 9.2/10.0
-     类型: AI Agent Framework
+     Status: agent_framework_detected
+     Detection Method: dynamic_agent_detection
+     Confidence: 9.2/10.0
+     Type: AI Agent Framework
 
  4. ✅ jupyter
-     状态: installed
-     检测方式: conda_env, running_process  
-     版本: 1.0.0
-     端口: 8888
+     Status: installed
+     Detection Method: conda_env, running_process  
+     Version: 1.0.0
+     Port: 8888
 
  5. ✅ openai
-     状态: installed
-     检测方式: pip_installed, import_detection
-     版本: 1.3.7
+     Status: installed
+     Detection Method: pip_installed, import_detection
+     Version: 1.3.7
 
-🤔 确认检测结果:
-是否有遗漏的已安装AI工具/框架? [y/N]: n
+🤔 Confirm Detection Results:
+Are there any missing installed AI tools/frameworks? [y/N]: n
 
-📋 已确认工具列表 (共5个):
-  1. langchain (🔍 自动检测)
-  2. streamlit (🔍 自动检测)
-  3. crewai (🔍 自动检测)  
-  4. jupyter (🔍 自动检测)
-  5. openai (🔍 自动检测)
+📋 Confirmed Tool List (5 total):
+  1. langchain (🔍 Auto-detected)
+  2. streamlit (🔍 Auto-detected)
+  3. crewai (🔍 Auto-detected)  
+  4. jupyter (🔍 Auto-detected)
+  5. openai (🔍 Auto-detected)
 
-🎯 目标工具配置:
-请输入您计划安装的AI工具/框架
+🎯 Target Tool Configuration:
+Please enter the AI tools/frameworks you plan to install
 
-💾 上次保存的目标工具 (0个):
+💾 Previously saved target tools (0 tools):
 
-请输入计划安装的工具: autogen=https://github.com/microsoft/autogen, gradio
+Please enter tools to install: autogen=https://github.com/microsoft/autogen, gradio
 
-🔍 正在搜索 gradio 的GitHub地址...
-🎯 目标工具: autogen (https://github.com/microsoft/autogen)  
-🎯 目标工具: gradio (https://github.com/gradio-app/gradio)
+🔍 Searching for gradio's GitHub address...
+🎯 Target Tool: autogen (https://github.com/microsoft/autogen)  
+🎯 Target Tool: gradio (https://github.com/gradio-app/gradio)
 
-📋 共计划安装 2 个工具
+📋 Total planned installations: 2 tools
 
-🔑 API密钥配置:
-AI冲突分析需要大模型API支持更准确的分析
-✅ 检测到环境变量中的API密钥
+🔑 API Key Configuration:
+AI conflict analysis requires large model API support for more accurate analysis
+✅ API key detected in environment variables
 
-🔄 开始冲突分析...
-分析进度 ████████████████████████████████████████ 100%
+🔄 Starting conflict analysis...
+Analysis Progress ████████████████████████████████████████ 100%
 
 ============================================================
-🎯 AI工具冲突分析报告  
+🎯 AI Tool Conflict Analysis Report  
 ============================================================
-📊 分析摘要:
-   • 已安装工具: 5 个
-   • 目标安装工具: 2 个
-   • 发现的冲突: 4 个
+📊 Analysis Summary:
+   • Installed tools: 5
+   • Target installation tools: 2
+   • Conflicts detected: 4
 
-⚠️ 重要冲突提醒:
+⚠️ Important Conflict Alerts:
 
-1. 🔴 HIGH - 端口冲突
-   影响工具: streamlit ↔ gradio (计划安装)
-   问题: 两个工具都默认使用端口 7860/8501 范围
-   影响: 无法同时运行，或会出现端口占用错误
-   ✅ 解决方案: 配置不同端口
-   命令: 
+1. 🔴 HIGH - Port Conflict
+   Affected Tools: streamlit ↔ gradio (planned installation)
+   Issue: Both tools default to using ports in the 7860/8501 range
+   Impact: Cannot run simultaneously, or will encounter port occupation errors
+   ✅ Solution: Configure different ports
+   Commands: 
    - streamlit run app.py --server.port 8502
    - gradio app.py --server-port 7861
-   置信度: high
+   Confidence: high
 
-2. 🟡 MEDIUM - 功能重叠  
-   影响工具: crewai ↔ autogen (计划安装)
-   问题: 都是多代理协作框架，核心功能重叠度高
-   影响: 可能导致架构混乱，学习成本增加
-   ✅ 解决方案: 选择一个作为主框架
-   建议: CrewAI 更适合任务编排，AutoGen 更适合对话式代理
-   置信度: high
+2. 🟡 MEDIUM - Functionality Overlap  
+   Affected Tools: crewai ↔ autogen (planned installation)
+   Issue: Both are multi-agent collaboration frameworks with high core functionality overlap
+   Impact: May lead to architectural confusion and increased learning costs
+   ✅ Solution: Choose one as the primary framework
+   Recommendation: CrewAI is better for task orchestration, AutoGen is better for conversational agents
+   Confidence: high
 
-3. 🟡 MEDIUM - 环境变量冲突
-   影响工具: langchain ↔ crewai ↔ autogen ↔ openai
-   问题: 都可能使用 OPENAI_API_KEY 环境变量
-   影响: 需要确保 API 密钥配置一致性
-   ✅ 解决方案: 统一环境变量管理
-   建议: 使用 .env 文件统一管理 API 密钥
-   置信度: medium
+3. 🟡 MEDIUM - Environment Variable Conflict
+   Affected Tools: langchain ↔ crewai ↔ autogen ↔ openai
+   Issue: All may use the OPENAI_API_KEY environment variable
+   Impact: Need to ensure API key configuration consistency
+   ✅ Solution: Unified environment variable management
+   Recommendation: Use .env file to manage API keys uniformly
+   Confidence: medium
 
-4. 🟡 MEDIUM - 依赖冲突风险
-   影响工具: jupyter ↔ streamlit ↔ gradio
-   问题: 可能存在 numpy/pandas 版本依赖冲突
-   影响: 安装过程可能出现版本兼容性问题
-   ✅ 解决方案: 使用虚拟环境，明确依赖版本
-   建议: pip install --upgrade numpy pandas 在安装前
-   置信度: medium
+4. 🟡 MEDIUM - Dependency Conflict Risk
+   Affected Tools: jupyter ↔ streamlit ↔ gradio
+   Issue: Potential numpy/pandas version dependency conflicts
+   Impact: Installation process may encounter version compatibility issues
+   ✅ Solution: Use virtual environment, specify dependency versions
+   Recommendation: pip install --upgrade numpy pandas before installation
+   Confidence: medium
 
-💡 安装建议顺序:
-1. 首先配置环境变量 (.env 文件)
-2. 安装基础工具: openai, langchain (已安装)  
-3. 在 crewai 和 autogen 中选择一个主框架
-4. 安装 gradio，配置端口避免与 streamlit 冲突
-5. 最后进行集成测试，验证所有工具正常工作
+💡 Recommended Installation Order:
+1. First configure environment variables (.env file)
+2. Install base tools: openai, langchain (already installed)  
+3. Choose one primary framework between crewai and autogen
+4. Install gradio, configure port to avoid conflicts with streamlit
+5. Finally perform integration testing to verify all tools work properly
 
-🔧 具体配置建议:
+🔧 Specific Configuration Recommendations:
 ```bash
-# .env 文件配置
+# .env file configuration
 OPENAI_API_KEY=your_key_here
 STREAMLIT_SERVER_PORT=8502
 GRADIO_SERVER_PORT=7861
 
-# 虚拟环境设置
+# Virtual environment setup
 python -m venv ai-project-env
 source ai-project-env/bin/activate  # Linux/Mac
 # ai-project-env\Scripts\activate  # Windows
 
-# 按顺序安装
+# Install in sequence
 pip install --upgrade numpy pandas
-pip install autogen  # 或 crewai，不建议同时安装
+pip install autogen  # or crewai, not recommended to install both
 pip install gradio
 ```
 
-📄 详细报告已保存至: ./ai-tools-conflict-report-2024-01-15-143045.json
-📊 工具配置已更新至: ~/.ai-pitfall-detector/project-configs.yaml
+📄 Detailed report saved to: ./ai-tools-conflict-report-2024-01-15-143045.json
+📊 Tool configuration updated to: ~/.ai-pitfall-detector/project-configs.yaml
 
 ✅ Interactive workflow completed successfully!
 
-🎉 下一步建议:
-1. 查看详细 JSON 报告了解技术细节
-2. 按照安装顺序建议配置工具
-3. 如有问题，重新运行 ai-pitfall interactive 获取最新分析
+🎉 Next Step Recommendations:
+1. Review detailed JSON report for technical details
+2. Configure tools according to installation order recommendations
+3. If issues arise, re-run ai-pitfall interactive for latest analysis
 ```
 
 </details>
