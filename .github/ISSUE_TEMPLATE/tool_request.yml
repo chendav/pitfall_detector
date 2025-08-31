@@ -1,0 +1,93 @@
+name: 🔧 New Tool Support
+description: Request support for a new AI tool or framework
+title: "[Tool]: Add support for "
+labels: ["tool-request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request support for a new AI tool or framework! This helps expand our detection capabilities.
+
+  - type: input
+    attributes:
+      label: Tool/Framework Name
+      description: Name of the AI tool or framework
+      placeholder: "e.g., Chainlit, Reflex, etc."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: GitHub Repository
+      description: GitHub URL for the tool (if available)
+      placeholder: "https://github.com/author/tool-name"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Package Name
+      description: Python package name (pip install name)
+      placeholder: "e.g., chainlit, reflex-web"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Tool Category
+      description: What type of AI tool is this?
+      options:
+        - Web Interface (Streamlit, Gradio, etc.)
+        - Agent Framework (CrewAI, AutoGen, etc.)
+        - RAG Tool (LangChain, LlamaIndex, etc.)
+        - ML Framework (PyTorch, TensorFlow, etc.)
+        - API Framework (FastAPI, Flask, etc.)
+        - Development Tool (Jupyter, VS Code extension, etc.)
+        - Database/Vector Store (Chroma, Pinecone, etc.)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Tool Description
+      description: Brief description of what this tool does
+      placeholder: "What does this tool do and why is it popular?"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Known Conflicts
+      description: Do you know of any conflicts with other AI tools?
+      placeholder: "e.g., uses same default port as Streamlit, conflicts with specific versions of pandas"
+
+  - type: textarea
+    attributes:
+      label: Default Ports
+      description: What ports does this tool use by default?
+      placeholder: "e.g., 8501, 7860, 3000"
+
+  - type: textarea
+    attributes:
+      label: Environment Variables
+      description: What environment variables does this tool commonly use?
+      placeholder: "e.g., TOOL_API_KEY, TOOL_CONFIG_PATH"
+
+  - type: textarea
+    attributes:
+      label: Detection Hints
+      description: How can we detect if this tool is installed/used?
+      placeholder: |
+        - Import statements: from tool_name import ...
+        - Config files: tool_config.yaml
+        - Command line tools: tool-cli
+        - Specific classes/functions: ToolMainClass
+
+  - type: checkboxes
+    attributes:
+      label: Contribution
+      options:
+        - label: I can provide sample projects using this tool for testing
+        - label: I would be willing to help implement detection for this tool
+        - label: I can help test the implementation once added

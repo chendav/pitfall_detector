@@ -1,0 +1,105 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill out this form completely.
+
+  - type: checkboxes
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I have tested with the latest version of AI Pitfall Detector
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Run command '...'
+        2. Navigate to '...'
+        3. See error '...'
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual Behavior
+      description: What actually happened, including error messages
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Operating System
+      options:
+        - Windows 10
+        - Windows 11
+        - macOS (Intel)
+        - macOS (Apple Silicon)
+        - Ubuntu/Debian Linux
+        - CentOS/RHEL Linux
+        - Other Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Python Version
+      description: Output of `python --version`
+      placeholder: "3.9.7"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: AI Pitfall Detector Version
+      description: Output of `ai-pitfall --version`
+      placeholder: "2.0.0"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Terminal/Shell
+      description: What terminal or shell are you using?
+      placeholder: "Windows Terminal, iTerm2, bash, zsh, etc."
+
+  - type: textarea
+    attributes:
+      label: Command Output
+      description: Copy and paste the full command output that shows the error
+      render: shell
+
+  - type: textarea
+    attributes:
+      label: Configuration
+      description: Any relevant configuration (redact sensitive information like API keys)
+      render: yaml
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or files that might help

@@ -1,32 +1,64 @@
-"""Static conflict rules for common AI tool conflicts."""
+"""Static rules for AI tool conflict detection - Database-driven version."""
 
-from typing import Dict, List, Any
+from typing import Dict, List, Set
+from .tools_database_loader import get_tools_database
 
 
-# Known default ports for popular AI tools
-KNOWN_TOOL_PORTS = {
-    'streamlit': [8501],
-    'gradio': [7860],
-    'jupyter': [8888],
-    'tensorboard': [6006],
-    'mlflow': [5000],
-    'fastapi': [8000],
-    'flask': [5000],
-    'dash': [8050],
-    'bokeh': [5006],
-    'voila': [8866]
-}
+# Load tools from the external database
+def _load_known_tools() -> Dict[str, Dict]:
+    """Load known AI tools from the external database."""
+    try:
+        db = get_tools_database()
+        return db.get_all_tools()
+    except Exception as e:
+        print(f"Warning: Failed to load tools database: {e}")
+        return {}
 
-# Known environment variable conflicts
+
+# Known AI tools - loaded from external database  
+KNOWN_AI_TOOLS = _load_known_tools()
+
+# Load port and environment conflicts from database
+def _load_conflict_data():
+    """Load conflict data from database."""
+    try:
+        db = get_tools_database()
+        return {
+            'port_conflicts': db.get_port_conflicts(),
+            'env_conflicts': db.get_env_conflicts(),
+            'conflict_patterns': db.get_conflict_patterns()
+        }
+    except Exception as e:
+        print(f"Warning: Failed to load conflict data: {e}")
+        return {'port_conflicts': {}, 'env_conflicts': {}, 'conflict_patterns': {}}
+
+# Load conflict data
+_conflict_data = _load_conflict_data()
+
+# Known default ports for popular AI tools - from database
+KNOWN_TOOL_PORTS = {}
+for tool_name, tool_info in KNOWN_AI_TOOLS.items():
+    ports = tool_info.get('default_ports', [])
+    if ports:
+        KNOWN_TOOL_PORTS[tool_name] = ports
+
+# Known environment variable conflicts - from database
+KNOWN_ENV_CONFLICTS = {}
+tools_by_env = {}
+for tool_name, tool_info in KNOWN_AI_TOOLS.items():
+    env_vars = tool_info.get('common_env_vars', [])
+    for env_var in env_vars:
+        if env_var not in tools_by_env:
+            tools_by_env[env_var] = []
+        tools_by_env[env_var].append(tool_name)
+
+# Only include env vars used by multiple tools (potential conflicts)
 KNOWN_ENV_CONFLICTS = {
-    'OPENAI_API_KEY': ['openai', 'langchain', 'llama-index', 'autogen'],
-    'ANTHROPIC_API_KEY': ['anthropic', 'claude'],
-    'HF_TOKEN': ['huggingface', 'transformers'],
-    'CUDA_VISIBLE_DEVICES': ['pytorch', 'tensorflow', 'jax'],
-    'TOKENIZERS_PARALLELISM': ['transformers', 'datasets']
+    env_var: tools for env_var, tools in tools_by_env.items()
+    if len(tools) > 1
 }
 
-# Known dependency conflicts
+# Known dependency conflicts - loaded from database conflict patterns
 KNOWN_DEPENDENCY_CONFLICTS = [
     {
         'conflict_type': 'version_conflict',
@@ -42,30 +74,98 @@ KNOWN_DEPENDENCY_CONFLICTS = [
     }
 ]
 
-# Known functional overlaps
-FUNCTIONAL_OVERLAPS = {
-    'agent-framework': {
-        'tools': ['crewai', 'autogen', 'langchain-agents', 'semantic-kernel'],
-        'conflict_level': 'medium',
-        'description': 'Multiple agent frameworks may compete for resources'
-    },
-    'web-interface': {
-        'tools': ['streamlit', 'gradio', 'dash', 'bokeh'],
-        'conflict_level': 'high',
-        'description': 'Web interfaces typically conflict on default ports'
-    },
-    'vector-db': {
-        'tools': ['chroma', 'pinecone', 'weaviate', 'qdrant'],
-        'conflict_level': 'low',
-        'description': 'Multiple vector databases may cause configuration confusion'
+# Functional overlaps - generated from database categories
+FUNCTIONAL_OVERLAPS = {}
+db = get_tools_database()
+categories = {}
+
+# Group tools by category
+for tool_name, tool_info in KNOWN_AI_TOOLS.items():
+    category = tool_info.get('category')
+    if category:
+        if category not in categories:
+            categories[category] = []
+        categories[category].append(tool_name)
+
+# Create functional overlaps for categories with multiple tools
+for category, tools in categories.items():
+    if len(tools) > 1:
+        # Determine conflict level based on category
+        if category in ['web-interface', 'api-framework']:
+            conflict_level = 'high'
+            description = 'Web interfaces typically conflict on default ports'
+        elif category == 'agent-framework':
+            conflict_level = 'medium'
+            description = 'Multiple agent frameworks may compete for resources'
+        else:
+            conflict_level = 'low'
+            description = f'Multiple {category} tools may cause configuration confusion'
+        
+        FUNCTIONAL_OVERLAPS[category] = {
+            'tools': tools,
+            'conflict_level': conflict_level,
+            'description': description
+        }
+
+
+# Database helper functions
+def get_tool_info(tool_name: str) -> Dict:
+    """Get tool information from database."""
+    return KNOWN_AI_TOOLS.get(tool_name.lower(), {})
+
+def get_tools_by_category(category: str) -> Dict[str, Dict]:
+    """Get all tools in a specific category."""
+    db = get_tools_database()
+    return db.get_tools_by_category(category)
+
+def search_tools(query: str) -> List[tuple[str, Dict]]:
+    """Search tools in the database."""
+    db = get_tools_database()
+    return db.search_tools(query)
+
+def get_database_info() -> Dict:
+    """Get database metadata."""
+    db = get_tools_database()
+    return db.get_database_info()
+
+def reload_tools_database():
+    """Reload the tools database."""
+    global KNOWN_AI_TOOLS, KNOWN_TOOL_PORTS, KNOWN_ENV_CONFLICTS, FUNCTIONAL_OVERLAPS
+    from .tools_database_loader import reload_database
+    
+    reload_database()
+    
+    # Reload all derived data
+    KNOWN_AI_TOOLS = _load_known_tools()
+    
+    # Reload port data
+    KNOWN_TOOL_PORTS = {}
+    for tool_name, tool_info in KNOWN_AI_TOOLS.items():
+        ports = tool_info.get('default_ports', [])
+        if ports:
+            KNOWN_TOOL_PORTS[tool_name] = ports
+    
+    # Reload env conflicts
+    tools_by_env = {}
+    for tool_name, tool_info in KNOWN_AI_TOOLS.items():
+        env_vars = tool_info.get('common_env_vars', [])
+        for env_var in env_vars:
+            if env_var not in tools_by_env:
+                tools_by_env[env_var] = []
+            tools_by_env[env_var].append(tool_name)
+    
+    KNOWN_ENV_CONFLICTS = {
+        env_var: tools for env_var, tools in tools_by_env.items()
+        if len(tools) > 1
     }
-}
+    
+    print("Tools database reloaded successfully")
 
 
 class StaticConflictDetector:
-    """Detects conflicts using hardcoded rules for common AI tools."""
+    """Detects conflicts using database rules for AI tools."""
     
-    def detect_port_conflicts(self, tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_port_conflicts(self, tools: List[Dict[str, any]]) -> List[Dict[str, any]]:
         """Detect port conflicts between tools."""
         conflicts = []
         port_usage = {}
@@ -95,7 +195,7 @@ class StaticConflictDetector:
         
         return conflicts
     
-    def detect_env_conflicts(self, tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_env_conflicts(self, tools: List[Dict[str, any]]) -> List[Dict[str, any]]:
         """Detect environment variable conflicts."""
         conflicts = []
         
@@ -108,7 +208,7 @@ class StaticConflictDetector:
                 
                 # Check if tool uses this env var (either extracted or known)
                 if (env_var in extracted_envs or 
-                    any(related_tool in tool_name for related_tool in related_tools)):
+                    any(tool_name in related_tool or related_tool in tool_name for related_tool in related_tools)):
                     matching_tools.append(tool_name)
             
             if len(matching_tools) > 1:
@@ -125,7 +225,7 @@ class StaticConflictDetector:
         
         return conflicts
     
-    def detect_functional_overlaps(self, tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_functional_overlaps(self, tools: List[Dict[str, any]]) -> List[Dict[str, any]]:
         """Detect functional overlaps between tools."""
         conflicts = []
         
@@ -154,7 +254,7 @@ class StaticConflictDetector:
         
         return conflicts
     
-    def detect_all_static_conflicts(self, tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect_all_static_conflicts(self, tools: List[Dict[str, any]]) -> List[Dict[str, any]]:
         """Run all static conflict detection methods."""
         all_conflicts = []
         
@@ -163,32 +263,3 @@ class StaticConflictDetector:
         all_conflicts.extend(self.detect_functional_overlaps(tools))
         
         return all_conflicts
-
-
-# Predefined conflict rules that can be easily updated
-STATIC_CONFLICT_RULES = [
-    {
-        'name': 'streamlit_gradio_port_conflict',
-        'tools': ['streamlit', 'gradio'],
-        'type': 'port_conflict',
-        'severity': 'high',
-        'description': 'Streamlit (8501) and Gradio (7860) may conflict if both try to use default ports',
-        'mitigation': 'Use streamlit run --server.port 8502 or gradio.launch(server_port=7861)'
-    },
-    {
-        'name': 'jupyter_notebook_port_conflict',
-        'tools': ['jupyter', 'jupyterlab', 'notebook'],
-        'type': 'port_conflict',
-        'severity': 'medium', 
-        'description': 'Multiple Jupyter instances may conflict on port 8888',
-        'mitigation': 'Use jupyter lab --port 8889 for additional instances'
-    },
-    {
-        'name': 'agent_framework_overlap',
-        'tools': ['crewai', 'autogen', 'langchain'],
-        'type': 'functionality_overlap',
-        'severity': 'medium',
-        'description': 'Multiple agent frameworks may compete for resources and cause confusion',
-        'mitigation': 'Choose one primary agent framework and use others for specific features only'
-    }
-]

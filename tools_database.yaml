@@ -1,0 +1,443 @@
+# AI Tools Static Database
+# This file contains the comprehensive database of known AI tools and frameworks
+# Used by the AI Pitfall Detector for static tool recognition and conflict analysis
+
+version: "1.0"
+last_updated: "2025-08-30"
+description: "Static database of AI tools, frameworks, and their configuration patterns"
+
+# Tool Categories
+categories:
+  llm-interface: "Large Language Model interfaces and APIs"
+  rag-tool: "Retrieval Augmented Generation tools"
+  memory-management: "Memory and context management systems"
+  web-interface: "Web-based user interfaces"
+  agent-framework: "AI Agent orchestration frameworks"
+  ml-framework: "Machine Learning frameworks"
+  api-framework: "API development frameworks"
+  web-framework: "Web development frameworks"
+
+# Known AI Tools Database
+tools:
+  # LLM Interface Tools
+  openai:
+    name: "OpenAI Python Client"
+    package_names: ["openai"]
+    github_url: "https://github.com/openai/openai-python"
+    category: "llm-interface"
+    default_ports: []
+    common_env_vars: ["OPENAI_API_KEY"]
+    description: "The official Python library for the OpenAI API"
+    detection_patterns:
+      imports: ["openai", "from openai"]
+      classes: ["OpenAI", "ChatCompletion"]
+      functions: ["chat.completions.create"]
+
+  anthropic:
+    name: "Anthropic Claude API"
+    package_names: ["anthropic"]
+    github_url: "https://github.com/anthropics/anthropic-sdk-python"
+    category: "llm-interface"
+    default_ports: []
+    common_env_vars: ["ANTHROPIC_API_KEY"]
+    description: "Python SDK for Anthropic's Claude API"
+    detection_patterns:
+      imports: ["anthropic", "from anthropic"]
+      classes: ["Anthropic", "Client"]
+
+  langchain:
+    name: "LangChain"
+    package_names: ["langchain", "langchain-core", "langchain-community"]
+    github_url: "https://github.com/langchain-ai/langchain"
+    category: "rag-tool"
+    default_ports: []
+    common_env_vars: ["LANGCHAIN_API_KEY", "LANGSMITH_API_KEY", "OPENAI_API_KEY"]
+    description: "Building applications with LLMs through composability"
+    detection_patterns:
+      imports: ["langchain", "from langchain"]
+      classes: ["LLM", "Chain", "Agent"]
+
+  # RAG and Memory Tools
+  chroma:
+    name: "Chroma Vector Database"
+    package_names: ["chromadb"]
+    github_url: "https://github.com/chroma-core/chroma"
+    category: "memory-management"
+    default_ports: [8000]
+    common_env_vars: []
+    description: "Open-source embedding database"
+    detection_patterns:
+      imports: ["chromadb", "from chromadb"]
+      classes: ["Client", "Collection"]
+
+  pinecone:
+    name: "Pinecone Vector Database"
+    package_names: ["pinecone-client"]
+    github_url: "https://github.com/pinecone-io/pinecone-python-client"
+    category: "memory-management"
+    default_ports: []
+    common_env_vars: ["PINECONE_API_KEY"]
+    description: "Managed vector database for ML applications"
+
+  # Web Interface Tools  
+  streamlit:
+    name: "Streamlit"
+    package_names: ["streamlit"]
+    github_url: "https://github.com/streamlit/streamlit"
+    category: "web-interface"
+    default_ports: [8501]
+    common_env_vars: ["STREAMLIT_SERVER_PORT"]
+    description: "Fastest way to build and share data apps"
+    detection_patterns:
+      imports: ["streamlit", "import streamlit as st"]
+      functions: ["st.write", "st.sidebar"]
+      files: ["streamlit_app.py", ".streamlit/config.toml"]
+
+  gradio:
+    name: "Gradio"
+    package_names: ["gradio"]
+    github_url: "https://github.com/gradio-app/gradio"
+    category: "web-interface"
+    default_ports: [7860]
+    common_env_vars: ["GRADIO_SERVER_PORT"]
+    description: "Build machine learning web apps"
+    detection_patterns:
+      imports: ["gradio", "import gradio as gr"]
+      functions: ["gr.Interface", "gr.launch"]
+
+  chainlit:
+    name: "Chainlit"
+    package_names: ["chainlit"]
+    github_url: "https://github.com/Chainlit/chainlit"
+    category: "web-interface"
+    default_ports: [8000]
+    common_env_vars: []
+    description: "Build Conversational AI in minutes"
+    detection_patterns:
+      imports: ["chainlit", "import chainlit as cl"]
+      functions: ["cl.on_message", "cl.run"]
+
+  # Agent Frameworks
+  bmad:
+    name: "BMAD-METHOD"
+    package_names: ["bmad-method"]
+    github_url: "https://github.com/chendav/BMAD-METHOD"
+    category: "agent-framework"
+    default_ports: []
+    common_env_vars: ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
+    description: "Breakthrough Method of Agile AI-driven Development"
+    detection_patterns:
+      directories: [".bmad-core"]
+      files: ["bmad-master.md", "bmad-orchestrator.md"]
+      config_files: ["core-config.yaml", "install-manifest.yaml"]
+
+  autogen:
+    name: "AutoGen"
+    package_names: ["pyautogen"]
+    github_url: "https://github.com/microsoft/autogen"
+    category: "agent-framework" 
+    default_ports: []
+    common_env_vars: ["OPENAI_API_KEY"]
+    description: "Multi-agent conversation framework"
+    detection_patterns:
+      imports: ["autogen", "from autogen"]
+      classes: ["AssistantAgent", "UserProxyAgent"]
+
+  crewai:
+    name: "CrewAI"
+    package_names: ["crewai"]
+    github_url: "https://github.com/joaomdmoura/crewAI"
+    category: "agent-framework"
+    default_ports: []
+    common_env_vars: ["OPENAI_API_KEY"]
+    description: "Framework for orchestrating role-playing autonomous AI agents"
+    detection_patterns:
+      imports: ["crewai", "from crewai"]
+      classes: ["Agent", "Task", "Crew"]
+
+  # ML Frameworks
+  transformers:
+    name: "HuggingFace Transformers"
+    package_names: ["transformers"]
+    github_url: "https://github.com/huggingface/transformers"
+    category: "ml-framework"
+    default_ports: []
+    common_env_vars: ["HUGGINGFACE_API_TOKEN", "HF_TOKEN"]
+    description: "State-of-the-art machine learning for PyTorch, TensorFlow, and JAX"
+    detection_patterns:
+      imports: ["transformers", "from transformers"]
+      classes: ["AutoModel", "AutoTokenizer", "Pipeline"]
+
+  torch:
+    name: "PyTorch"
+    package_names: ["torch", "pytorch"]
+    github_url: "https://github.com/pytorch/pytorch"
+    category: "ml-framework"
+    default_ports: []
+    common_env_vars: ["CUDA_VISIBLE_DEVICES"]
+    description: "Tensors and dynamic neural networks in Python with strong GPU acceleration"
+    detection_patterns:
+      imports: ["torch", "import torch"]
+      classes: ["nn.Module", "DataLoader"]
+
+  tensorflow:
+    name: "TensorFlow"
+    package_names: ["tensorflow", "tensorflow-gpu"]
+    github_url: "https://github.com/tensorflow/tensorflow"
+    category: "ml-framework"
+    default_ports: []
+    common_env_vars: ["CUDA_VISIBLE_DEVICES", "TF_CPP_MIN_LOG_LEVEL"]
+    description: "TensorFlow machine learning platform"
+    detection_patterns:
+      imports: ["tensorflow", "import tensorflow as tf"]
+      classes: ["keras.Model"]
+
+  # API Frameworks
+  fastapi:
+    name: "FastAPI"
+    package_names: ["fastapi"]
+    github_url: "https://github.com/tiangolo/fastapi"
+    category: "api-framework"
+    default_ports: [8000]
+    common_env_vars: []
+    description: "Modern web framework for building APIs with Python"
+    detection_patterns:
+      imports: ["fastapi", "from fastapi"]
+      classes: ["FastAPI"]
+      functions: ["@app.get", "@app.post"]
+
+  flask:
+    name: "Flask"
+    package_names: ["flask"]
+    github_url: "https://github.com/pallets/flask"
+    category: "api-framework"
+    default_ports: [5000]
+    common_env_vars: ["FLASK_APP", "FLASK_ENV"]
+    description: "The Python micro framework for building web applications"
+    detection_patterns:
+      imports: ["flask", "from flask"]
+      classes: ["Flask"]
+      functions: ["@app.route"]
+
+  django:
+    name: "Django"
+    package_names: ["django"]
+    github_url: "https://github.com/django/django"
+    category: "web-framework"
+    default_ports: [8000]
+    common_env_vars: ["DJANGO_SETTINGS_MODULE"]
+    description: "The Web framework for perfectionists with deadlines"
+    detection_patterns:
+      imports: ["django", "from django"]
+      files: ["manage.py", "settings.py"]
+      directories: ["migrations"]
+
+  # Development Tools
+  jupyter:
+    name: "Jupyter"
+    package_names: ["jupyter", "jupyterlab", "notebook"]
+    github_url: "https://github.com/jupyter/jupyter"
+    category: "web-interface"
+    default_ports: [8888]
+    common_env_vars: ["JUPYTER_PORT"]
+    description: "Interactive computing environment"
+    detection_patterns:
+      files: [".ipynb"]
+      imports: ["jupyter", "IPython"]
+
+  # Monitoring and MLOps
+  mlflow:
+    name: "MLflow"
+    package_names: ["mlflow"]
+    github_url: "https://github.com/mlflow/mlflow"
+    category: "ml-framework"
+    default_ports: [5000]
+    common_env_vars: ["MLFLOW_TRACKING_URI"]
+    description: "Machine Learning Lifecycle Management"
+    detection_patterns:
+      imports: ["mlflow"]
+      functions: ["mlflow.log_metric", "mlflow.start_run"]
+
+  tensorboard:
+    name: "TensorBoard"
+    package_names: ["tensorboard"]
+    github_url: "https://github.com/tensorflow/tensorboard"
+    category: "ml-framework"
+    default_ports: [6006]
+    common_env_vars: []
+    description: "TensorFlow's visualization toolkit"
+    detection_patterns:
+      imports: ["tensorboard"]
+      files: ["logs/", "tensorboard_logs/"]
+
+  wandb:
+    name: "Weights & Biases"
+    package_names: ["wandb"]
+    github_url: "https://github.com/wandb/wandb"
+    category: "ml-framework"
+    default_ports: []
+    common_env_vars: ["WANDB_API_KEY"]
+    description: "Machine learning experiment tracking"
+    detection_patterns:
+      imports: ["wandb"]
+      functions: ["wandb.init", "wandb.log"]
+
+  # Additional Framework Mappings
+  hugginface-transformers:
+    name: "HuggingFace Transformers (alias)"
+    package_names: ["transformers"]
+    github_url: "https://github.com/huggingface/transformers"
+    category: "ml-framework"
+    default_ports: []
+    common_env_vars: ["HUGGINGFACE_API_TOKEN", "HF_TOKEN"]
+    description: "HuggingFace transformers library"
+
+  nextjs:
+    name: "Next.js"
+    package_names: ["next"]
+    github_url: "https://github.com/vercel/next.js"
+    category: "web-framework"
+    default_ports: [3000]
+    common_env_vars: ["PORT"]
+    description: "The React Framework"
+    detection_patterns:
+      files: ["next.config.js", "pages/", "app/"]
+      imports: ["next"]
+
+# Port Conflict Matrix
+# Defines which ports commonly conflict with each other
+port_conflicts:
+  web_interfaces:
+    - 8000  # FastAPI, Chainlit
+    - 8501  # Streamlit
+    - 7860  # Gradio
+    - 8888  # Jupyter
+    - 3000  # Next.js, React dev server
+    - 5000  # Flask, MLflow
+    - 8080  # Generic web services
+
+  development_servers:
+    - 3000  # Next.js, React
+    - 8000  # FastAPI, Django dev
+    - 5000  # Flask default
+    - 8080  # Alternative web port
+
+# Environment Variable Conflicts
+env_conflicts:
+  model_apis:
+    - "OPENAI_API_KEY"
+    - "ANTHROPIC_API_KEY"
+    - "COHERE_API_KEY"
+  
+  tracking_services:
+    - "WANDB_API_KEY"
+    - "MLFLOW_TRACKING_URI"
+    - "NEPTUNE_API_TOKEN"
+
+# Common Conflict Patterns
+conflict_patterns:
+  port_conflicts:
+    severity: "HIGH"
+    description: "Tools using the same default ports will conflict"
+    
+  environment_overlap:
+    severity: "MEDIUM"
+    description: "Tools sharing environment variables may cause configuration conflicts"
+    
+  functionality_overlap:
+    severity: "LOW"
+    description: "Tools with similar functionality may cause user confusion"
+
+# Framework Detection Signatures
+# Used by dynamic detection system for pattern recognition
+detection_signatures:
+  agent_framework_indicators:
+    directories:
+      - "agents"
+      - "workflows" 
+      - "tasks"
+      - "crews"
+      - ".bmad-core"
+      - "autogen"
+      - "multi_agent"
+    
+    files:
+      - "*agent*.py"
+      - "*crew*.py"
+      - "*workflow*.yaml"
+      - "*task*.md"
+      - "bmad-*.md"
+      - "orchestrator*.py"
+    
+    code_patterns:
+      - "class.*Agent"
+      - "def.*agent"
+      - "multi.*agent"
+      - "autonomous"
+      - "orchestrat"
+      - "workflow"
+    
+    config_patterns:
+      - "agent_config"
+      - "crew_config"
+      - "workflow_config"
+      - "bmad"
+      - "autogen"
+
+  web_framework_indicators:
+    directories:
+      - "static"
+      - "templates"
+      - "public"
+      - "pages"
+      - "components"
+    
+    files:
+      - "app.py"
+      - "main.py"
+      - "wsgi.py"
+      - "requirements.txt"
+      - "package.json"
+    
+    code_patterns:
+      - "@app.route"
+      - "FastAPI()"
+      - "Flask(__name__)"
+      - "streamlit"
+      - "gradio"
+
+# Version Compatibility Matrix
+compatibility_matrix:
+  python_versions:
+    "3.8": ["openai", "langchain", "streamlit", "gradio"]
+    "3.9": ["transformers", "torch", "tensorflow"]
+    "3.10": ["fastapi", "chainlit", "autogen"]
+    "3.11": ["crewai", "bmad"]
+    "3.12": ["anthropic"]
+
+# Installation Commands
+installation_commands:
+  openai: "pip install openai"
+  anthropic: "pip install anthropic"
+  langchain: "pip install langchain"
+  streamlit: "pip install streamlit"
+  gradio: "pip install gradio"
+  chainlit: "pip install chainlit"
+  transformers: "pip install transformers"
+  torch: "pip install torch"
+  fastapi: "pip install fastapi uvicorn"
+  flask: "pip install flask"
+  bmad: "pip install bmad-method"
+  autogen: "pip install pyautogen"
+  crewai: "pip install crewai"
+
+# Documentation Links
+documentation:
+  openai: "https://platform.openai.com/docs"
+  anthropic: "https://docs.anthropic.com"
+  langchain: "https://docs.langchain.com"
+  streamlit: "https://docs.streamlit.io"
+  gradio: "https://gradio.app/docs"
+  chainlit: "https://docs.chainlit.io"
+  transformers: "https://huggingface.co/docs/transformers"
+  bmad: "https://github.com/chendav/BMAD-METHOD/blob/main/README.md"
